@@ -1,0 +1,43 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [16, 18]
+        os: [ macos-latest, ubuntu-latest ]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: |
+        export NVM_DIR="$HOME/.nvm"
+        source "$NVM_DIR/nvm.sh"
+        nvm install ${{ matrix.node-version }}
+        nvm install-latest-npm
+    - name: Run npm install --build-from-source
+      run: npm install --build-from-source
+    - run: npm test
+    - run: node example.js
+    - name: Publish binaries
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: ./node_modules/.bin/node-pre-gyp package unpublish publish info
+    - name: Publish Windows binaries
+      if: ${{ contains(github.event.commits[0].message, 'publish binary') && github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.os == 'windows-latest' }}
+      run: cmd /c 'node_modules\.bin\node-pre-gyp package unpublish publish info'

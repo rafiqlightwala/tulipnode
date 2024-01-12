@@ -1,4 +1,4 @@
-var tulind = require("./index");
+var tulind = require("./index"); 
 
 console.log("Tulip Indicators version is:");
 console.log(tulind.version);
