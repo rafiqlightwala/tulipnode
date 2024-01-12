@@ -33,7 +33,6 @@ jobs:
     - run: npm test
     - run: node example.js
     - name: Publish binaries
-      if: ${{ contains(github.event.commits[0].message, 'publish binary') && github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.os != 'windows-latest' }}
       run: ./node_modules/.bin/node-pre-gyp package unpublish publish info
     - name: Publish Windows binaries
       if: ${{ contains(github.event.commits[0].message, 'publish binary') && github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.os == 'windows-latest' }}
