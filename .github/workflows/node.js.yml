@@ -13,36 +13,38 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 18, 20, 22 ]
-        os: [ macos-14, ubuntu-22.04 ]
+        node-version: [18, 20]
+        os: [macos-14, ubuntu-22.04]
 
     steps:
     - uses: actions/checkout@v3
 
-    # Install NVM on macOS
-    - name: Install NVM on macOS
-      if: ${{ startsWith(matrix.os, 'macos') }}
-      run: |
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    - name: Use Node.js ${{ matrix.node-version }}
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: |
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        nvm install ${{ matrix.node-version }}
-        nvm install-latest-npm
-    - name: Run npm install --build-from-source
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install Dependencies
       run: npm install --build-from-source
-    - run: npm test
-    - run: node example.js
-    - name: Publish binaries
+
+    - name: Run Tests
+      run: npm test
+
+    - name: Run Example Script
+      run: node example.js
+
+    - name: Publish Binaries (Non-Windows)
+      if: ${{ matrix.os != 'windows-latest' }}
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      if: ${{ matrix.os != 'windows-latest' }}
       run: ./node_modules/.bin/node-pre-gyp package unpublish publish info
-    - name: Publish Windows binaries
-      if: ${{ contains(github.event.commits[0].message, 'publish binary') && github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.os == 'windows-latest' }}
+
+    - name: Publish Windows Binaries
+      if: >
+        contains(github.event.commits[0].message, 'publish binary') &&
+        github.event_name == 'push' &&
+        github.ref == 'refs/heads/master' &&
+        matrix.os == 'windows-latest'
       run: cmd /c 'node_modules\.bin\node-pre-gyp package unpublish publish info'
