@@ -13,8 +13,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22]
-        os: [macos-14, ubuntu-22.04]
+        node-version: [18]
+        os: [ubuntu-22.04]
 
     steps:
     - uses: actions/checkout@v3
