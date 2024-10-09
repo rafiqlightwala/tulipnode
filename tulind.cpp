@@ -30,7 +30,6 @@ using namespace v8;
 
 static double *get_array(Local<Array> input, int offset) {
     const int size = input->Length() - offset;
-t
     double *ret = (double*)malloc(sizeof(double) * size);
     //TODO check ret
 
