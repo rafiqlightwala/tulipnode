@@ -15,18 +15,22 @@ jobs:
       matrix:
         node-version: [ 18, 20, 22 ]
         os: [ macos-14, macos-14-large, ubuntu-22.04 ]
-        exclude:
-          # Exclude Node.js 18 for macos-14-large
-          - os: macos-14-large
-            node-version: 18
 
     steps:
     - uses: actions/checkout@v3
+
+    # Install NVM on macOS
+    - name: Install NVM on macOS
+      if: ${{ startsWith(matrix.os, 'macos') }}
+      run: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     - name: Use Node.js ${{ matrix.node-version }}
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
         export NVM_DIR="$HOME/.nvm"
-        source "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         nvm install ${{ matrix.node-version }}
         nvm install-latest-npm
     - name: Run npm install --build-from-source
