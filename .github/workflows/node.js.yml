@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         node-version: [ 18, 20, 22 ]
-        os: [ macos-latest, macos-latest-large, ubuntu-22.04 ]
+        os: [ macos-14, macos-14-large, ubuntu-22.04 ]
 
     steps:
     - uses: actions/checkout@v3
