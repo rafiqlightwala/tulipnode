@@ -158,5 +158,6 @@ l.run("array wilders", function() {
     });
 });
 
-// Exit with appropriate code: 0 if all tests passed, 1 otherwise
-process.exit(l.results() ? 0 : 1);
+var allTestsPassed = l.results() === false; // If no failures, `l.results()` is false.
+console.log(allTestsPassed ? 0 : 1); // Log 0 if tests passed, 1 if they failed
+process.exit(allTestsPassed ? 0 : 1); // Exit with 0 if tests passed, 1 if they failed
